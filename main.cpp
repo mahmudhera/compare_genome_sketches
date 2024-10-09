@@ -144,10 +144,17 @@ vector<hash_t> read_min_hashes(const string& json_filename) {
 vector<vector<hash_t>> read_sketches(vector<string> sketch_names)
 {
     vector<vector<hash_t>> sketches;
-    for (const auto& sketch_name : sketch_names) {
+    for (int i = 0; i < sketch_names.size(); i++) {
+        // show progress with every 10000 sketches using carriage return
+        if (i % 10000 == 0) {
+            cout << "\r" << i << " sketches read";
+        }
+        string sketch_name = sketch_names[i];
         vector<hash_t> min_hashes = read_min_hashes(sketch_name);
         sketches.push_back(min_hashes);
     }
+    cout << "\r" << sketch_names.size() << " sketches read" << endl;
+
     return sketches;
 }
 
@@ -254,6 +261,10 @@ int main(int argc, char* argv[]) {
     // read the sketches
     vector<vector<hash_t>> sketches = read_sketches(sketch_names);
 
+    auto end_read = chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds_read = end_read - now;
+    cout << "elapsed time for reading: " << elapsed_seconds_read.count() << "s\n";
+
     int query_index = std::stoi(argv[3]);
     unordered_map<size_t, size_t> intersection_sizes = compare_against_query(query_index, sketches);
 
@@ -264,7 +275,6 @@ int main(int argc, char* argv[]) {
     for (const auto& jaccard : jaccard_values) {
         output_file << jaccard.first << " " << jaccard.second << std::endl;
     }
-    
 
     auto end = chrono::system_clock::now();
 
