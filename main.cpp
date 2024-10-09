@@ -180,4 +180,21 @@ int main(int argc, char* argv[]) {
     // show time needed
     chrono::duration<double> elapsed_seconds = end - now;
     cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
+    // show size of first 5 sketches
+    for (int i = 0; i < 5; i++) {
+        cout << "Sketch " << i << " has " << sketches[i].size() << " minhashes" << endl;
+    }
+
+    // show first 3 hashes in the first five sketches
+    for (int i = 0; i < 5; i++) {
+        cout << "Sketch " << i << " has minhashes: ";
+        for (int j = 0; j < 3; j++) {
+            cout << sketches[i][j] << " ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+
 }
