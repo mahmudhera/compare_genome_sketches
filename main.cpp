@@ -230,8 +230,8 @@ unordered_map<size_t, size_t> compare_against_query(int query_index, vector<vect
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " filelist outputfile" << std::endl;
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " filelist outputfile queryIndex" << std::endl;
         return 1;
     }
 
@@ -243,7 +243,7 @@ int main(int argc, char* argv[]) {
     // read the sketches
     vector<vector<hash_t>> sketches = read_sketches(sketch_names);
 
-    int query_index = 0;
+    int query_index = std::stoi(argv[3]);
     unordered_map<size_t, size_t> results = compare_against_query(query_index, sketches);
 
     // write the results to stdout
