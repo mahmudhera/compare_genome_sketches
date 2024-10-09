@@ -259,10 +259,12 @@ int main(int argc, char* argv[]) {
 
     unordered_map<int, float> jaccard_values = compute_jaccard(intersection_sizes, sketches);
 
-    // write the jaccard values to stdout
-    for (const auto& result : jaccard_values) {
-        cout << result.first << " " << result.second << std::endl;
+    // write the jaccard values to file
+    ofstream output_file(argv[2]);
+    for (const auto& jaccard : jaccard_values) {
+        output_file << jaccard.first << " " << jaccard.second << std::endl;
     }
+    
 
     auto end = chrono::system_clock::now();
 
