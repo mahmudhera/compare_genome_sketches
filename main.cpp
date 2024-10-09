@@ -270,6 +270,15 @@ int main(int argc, char* argv[]) {
 
     unordered_map<int, float> jaccard_values = compute_jaccard(intersection_sizes, sketches);
 
+    // only keep the jaccard values if > 0.9
+    for (auto it = jaccard_values.begin(); it != jaccard_values.end(); ) {
+        if (it->second < 0.9) {
+            it = jaccard_values.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
     // write the jaccard values to file
     ofstream output_file(argv[2]);
     for (const auto& jaccard : jaccard_values) {
