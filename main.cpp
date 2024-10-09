@@ -167,6 +167,11 @@ int main(int argc, char* argv[]) {
     // read the sketches
     vector<vector<unsigned long long int>> sketches = read_sketches(sketch_names);
 
+    // for the first 10 sketches, show filename and num of minhashes
+    for (int i = 0; i < 10; i++) {
+        cout << sketch_names[i] << " " << sketches[i].size() << endl;
+    }
+
     auto end = chrono::system_clock::now();
 
     // show time needed
