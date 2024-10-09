@@ -14,19 +14,21 @@
 using json = nlohmann::json;
 using namespace std;
 
+typedef unsigned long long int hash_t;
+
 
 class HashValueMembersOf {
 public:
-    unsigned long long int key; // Key member variable
-    std::vector<unsigned long int> members_of; // List of unsigned long integers
+    hash_t key; // Key member variable
+    vector<int> members_of; // List of integers
 
     // Constructor to initialize key and optionally initialize the list
-    HashValueMembersOf(unsigned long long int k, unsigned long int member) : key(k) {
+    HashValueMembersOf(hash_t k, int member) : key(k) {
         members_of.push_back(member);
     }
 
     // Add a member to the list
-    void addMember(unsigned long int member) {
+    void addMember(int member) {
         members_of.push_back(member);
     }
 
@@ -49,12 +51,12 @@ struct Compare {
 
 class MinHeap {
 private:
-    std::priority_queue<HashValueMembersOf*, std::vector<HashValueMembersOf*>, Compare> heap;
-    std::unordered_map<unsigned long long int, HashValueMembersOf*> lookup; // Hash map to keep track of keys
+    priority_queue<HashValueMembersOf*, vector<HashValueMembersOf*>, Compare> heap;
+    unordered_map<hash_t, HashValueMembersOf*> lookup; // Hash map to keep track of keys
 
 public:
     // Insert function: If the key exists, append to members_of; if not, create a new object
-    void insert(unsigned long long int key, unsigned long int member_of) {
+    void insert(hash_t key, int member_of) {
         if (lookup.find(key) == lookup.end()) {
             // Key not found, create new MyClass object and insert it into the heap
             HashValueMembersOf* newObject = new HashValueMembersOf(key, member_of);
@@ -124,17 +126,17 @@ string decompressGzip(const std::string& filename) {
 }
 
 
-vector<unsigned long long int> read_min_hashes(const string& json_filename) {
+vector<hash_t> read_min_hashes(const string& json_filename) {
     auto jsonData = json::parse(decompressGzip(json_filename));
-    std::vector<unsigned long long int> min_hashes = jsonData[0]["signatures"][0]["mins"];
+    std::vector<hash_t> min_hashes = jsonData[0]["signatures"][0]["mins"];
     return min_hashes;
 }
 
-vector<vector<unsigned long long int>> read_sketches(vector<string> sketch_names)
+vector<vector<hash_t>> read_sketches(vector<string> sketch_names)
 {
-    vector<vector<unsigned long long int>> sketches;
+    vector<vector<hash_t>> sketches;
     for (const auto& sketch_name : sketch_names) {
-        vector<unsigned long long int> min_hashes = read_min_hashes(sketch_name);
+        vector<hash_t> min_hashes = read_min_hashes(sketch_name);
         sketches.push_back(min_hashes);
     }
     return sketches;
@@ -151,6 +153,7 @@ vector<string> get_sketch_names(const string& filelist) {
     return sketch_names;
 }
 
+unordered_map<size_t, size_t> compare_against_query()
 
 
 int main(int argc, char* argv[]) {
@@ -165,12 +168,9 @@ int main(int argc, char* argv[]) {
     vector<string> sketch_names = get_sketch_names(argv[1]);
 
     // read the sketches
-    vector<vector<unsigned long long int>> sketches = read_sketches(sketch_names);
+    vector<vector<hash_t>> sketches = read_sketches(sketch_names);
 
-    // for the first 10 sketches, show filename and num of minhashes
-    for (int i = 0; i < 10; i++) {
-        cout << sketch_names[i] << " " << sketches[i].size() << endl;
-    }
+    int querySketchIndex = 0;
 
     auto end = chrono::system_clock::now();
 
