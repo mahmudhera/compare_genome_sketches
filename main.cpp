@@ -144,11 +144,10 @@ vector<hash_t> read_min_hashes(const string& json_filename) {
 vector<vector<hash_t>> read_sketches(vector<string> sketch_names)
 {
     vector<vector<hash_t>> sketches;
-    cout << "0 sketches read\r";
     for (int i = 0; i < sketch_names.size(); i++) {
         // show progress with every 1000 sketches using carriage return
         if (i % 1000 == 0) {
-            cout << i << " sketches read" << "\r";
+            cout << i << " sketches read" << endl;
         }
         string sketch_name = sketch_names[i];
         vector<hash_t> min_hashes = read_min_hashes(sketch_name);
