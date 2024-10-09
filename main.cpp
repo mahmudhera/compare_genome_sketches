@@ -278,9 +278,14 @@ int main(int argc, char* argv[]) {
 
     auto end = chrono::system_clock::now();
 
+    // show time needed for processing after reading
+    chrono::duration<double> elapsed_seconds_processing = end - end_read;
+    cout << "elapsed time for processing: " << elapsed_seconds_processing.count() << "s\n";
+
     // show time needed
     chrono::duration<double> elapsed_seconds = end - now;
-    cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    cout << "elapsed time for everything: " << elapsed_seconds.count() << "s\n";
+
 
     return 0;
 
