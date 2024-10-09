@@ -21,6 +21,7 @@ class HashValueMembersOf {
 public:
     hash_t key; // Key member variable
     vector<int> members_of; // List of integers
+    bool appears_in_query = false;
 
     // Constructor to initialize key and optionally initialize the list
     HashValueMembersOf(hash_t k, int member) : key(k) {
@@ -102,6 +103,14 @@ public:
             tempHeap.pop();
         }
     }
+
+    void memberAppearsInQuery(hash_t key) {
+        if (lookup.find(key) != lookup.end()) {
+            lookup[key]->appears_in_query = true;
+        } else {
+            std::cout << "Key not found in lookup" << std::endl;
+        }
+    }
 };
 
 string decompressGzip(const std::string& filename) {
@@ -153,8 +162,69 @@ vector<string> get_sketch_names(const string& filelist) {
     return sketch_names;
 }
 
-unordered_map<size_t, size_t> compare_against_query(vector<hash_t> query_sketch, vector<vector<hash_t>> sketches) {
+unordered_map<size_t, size_t> compare_against_query(int query_index, vector<vector<hash_t>> sketches) {
     unordered_map<size_t, size_t> results;
+
+    // create an array of indices to keep track of the current element of each list
+    std::vector<size_t> indices(sketches.size(), 0);
+
+    // create a minheap to store the first element of all these lists
+    MinHeap minHeap;
+
+    for (int i = 0; i < sketches.size(); i++) {
+        if (!sketches[i].empty()) {
+            minHeap.insert(sketches[i][0], i);
+            if (i == query_index) {
+                minHeap.memberAppearsInQuery(sketches[i][0]);
+            }
+            indices[i] = 1;
+        }
+    }
+
+    // while the heap is not empty
+    while (!minHeap.isEmpty()) {
+
+        // pop the min element from the heap
+        HashValueMembersOf* minElement = minHeap.pop();
+
+        // get the lists that contain this element using the member_of list
+        std::vector<int> list_ids_where_this_element_a_member = minElement->members_of;
+
+        // if the element appears in the query, increment the count for each list that contains this element
+        if (minElement->appears_in_query) {
+            for (int i = 0; i < list_ids_where_this_element_a_member.size(); i++) {
+                int list_id = list_ids_where_this_element_a_member[i];
+                if (results.find(list_id) == results.end()) {
+                    results[list_id] = 1;
+                } else {
+                    results[list_id]++;
+                }
+            }
+        }
+
+        // for each list that contains this element
+        for (int i = 0; i < list_ids_where_this_element_a_member.size(); i++) {
+            int list_id1 = list_ids_where_this_element_a_member[i];
+            
+            // if the index is less than the size of the list, insert the element at that index into the heap
+            if (indices[list_id1] < sketches[list_id1].size()) {
+                auto next_element = sketches[list_id1][indices[list_id1]];
+                minHeap.insert(next_element, list_id1);
+                if (list_id1 == query_index) {
+                    minHeap.memberAppearsInQuery(next_element);
+                }
+
+                // increment the index for that list
+                indices[list_id1]++; 
+
+            }
+        }
+
+        // delete the min element
+        delete minElement;
+
+    }    
+
     return results;
 }
 
@@ -173,27 +243,19 @@ int main(int argc, char* argv[]) {
     // read the sketches
     vector<vector<hash_t>> sketches = read_sketches(sketch_names);
 
-    int querySketchIndex = 0;
+    int query_index = 0;
+    unordered_map<size_t, size_t> results = compare_against_query(query_index, sketches);
+
+    // write the results to stdout
+    for (const auto& result : results) {
+        cout << result.first << " " << result.second << std::endl;
+    }
 
     auto end = chrono::system_clock::now();
 
     // show time needed
     chrono::duration<double> elapsed_seconds = end - now;
     cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-
-    // show size of first 5 sketches
-    for (int i = 0; i < 5; i++) {
-        cout << "Sketch " << i << " has " << sketches[i].size() << " minhashes" << endl;
-    }
-
-    // show first 3 hashes in the first five sketches
-    for (int i = 0; i < 5; i++) {
-        cout << "Sketch " << i << " has minhashes: ";
-        for (int j = 0; j < 3; j++) {
-            cout << sketches[i][j] << " ";
-        }
-        cout << endl;
-    }
 
     return 0;
 
