@@ -153,7 +153,10 @@ vector<string> get_sketch_names(const string& filelist) {
     return sketch_names;
 }
 
-unordered_map<size_t, size_t> compare_against_query()
+unordered_map<size_t, size_t> compare_against_query(vector<hash_t> query_sketch, vector<vector<hash_t>> sketches) {
+    unordered_map<size_t, size_t> results;
+    return results;
+}
 
 
 int main(int argc, char* argv[]) {
