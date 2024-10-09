@@ -145,8 +145,8 @@ vector<vector<hash_t>> read_sketches(vector<string> sketch_names)
 {
     vector<vector<hash_t>> sketches;
     for (int i = 0; i < sketch_names.size(); i++) {
-        // show progress with every 10000 sketches using carriage return
-        if (i % 10000 == 0) {
+        // show progress with every 1000 sketches using carriage return
+        if (i % 1000 == 0) {
             cout << "\r" << i << " sketches read";
         }
         string sketch_name = sketch_names[i];
