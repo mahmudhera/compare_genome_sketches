@@ -229,6 +229,17 @@ unordered_map<size_t, size_t> compare_against_query(int query_index, vector<vect
 }
 
 
+unordered_map<int, float> compute_jaccard(unordered_map<size_t, size_t> intersection_sizes, vector<vector<hash_t>> sketches) {
+    unordered_map<int, float> jaccard_values;
+    for (const auto& result : intersection_sizes) {
+        int list_id = result.first;
+        float jaccard = (float)result.second / (float)(sketches[list_id].size() + sketches[0].size() - result.second);
+        jaccard_values[list_id] = jaccard;
+    }
+    return jaccard_values;
+}
+
+
 int main(int argc, char* argv[]) {
     if (argc != 4) {
         std::cerr << "Usage: " << argv[0] << " filelist outputfile queryIndex" << std::endl;
@@ -244,10 +255,12 @@ int main(int argc, char* argv[]) {
     vector<vector<hash_t>> sketches = read_sketches(sketch_names);
 
     int query_index = std::stoi(argv[3]);
-    unordered_map<size_t, size_t> results = compare_against_query(query_index, sketches);
+    unordered_map<size_t, size_t> intersection_sizes = compare_against_query(query_index, sketches);
 
-    // write the results to stdout
-    for (const auto& result : results) {
+    unordered_map<int, float> jaccard_values = compute_jaccard(intersection_sizes, sketches);
+
+    // write the jaccard values to stdout
+    for (const auto& result : jaccard_values) {
         cout << result.first << " " << result.second << std::endl;
     }
 
